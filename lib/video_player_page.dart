@@ -5,25 +5,19 @@ import 'package:file_picker/file_picker.dart';
 import 'dart:io';
 import 'package:video_player_trimmer/video_trimmer_page.dart';
 
-
-
 class MyVideoPlayer extends StatefulWidget {
-
-
   final File file;
-  const MyVideoPlayer({required this.file,super.key});
-
-
+  const MyVideoPlayer({required this.file, super.key});
 
   @override
   _MyVideoPlayerState createState() => _MyVideoPlayerState(file);
 }
 
 class _MyVideoPlayerState extends State<MyVideoPlayer> {
-  _MyVideoPlayerState(File file){
+  _MyVideoPlayerState(File file) {
     filePath = file.path;
   }
-  String filePath ="";
+  String filePath = "";
   late VideoPlayerController _controller;
   late Future<void> _initializeVideoPlayerFuture;
   double _currentSliderValue = 0.0;
@@ -32,7 +26,6 @@ class _MyVideoPlayerState extends State<MyVideoPlayer> {
   bool _isWideScreen = false;
   double _playbackSpeed = 1.0;
   String appBarText = "";
-
 
   @override
   void initState() {
@@ -64,6 +57,7 @@ class _MyVideoPlayerState extends State<MyVideoPlayer> {
       }
     });
   }
+
   void _showSpeedPopupMenu(BuildContext context) async {
     double? selectedSpeed = await showMenu<double>(
       context: context,
@@ -102,6 +96,7 @@ class _MyVideoPlayerState extends State<MyVideoPlayer> {
       _controller.setPlaybackSpeed(_playbackSpeed);
     }
   }
+
   String formatDuration(Duration duration) {
     String twoDigits(int n) => n.toString().padLeft(2, '0');
     String twoDigitHours = twoDigits(duration.inHours);
@@ -109,12 +104,14 @@ class _MyVideoPlayerState extends State<MyVideoPlayer> {
     String twoDigitSeconds = twoDigits(duration.inSeconds.remainder(60));
     return "$twoDigitHours:$twoDigitMinutes:$twoDigitSeconds";
   }
+
   void _resetTimer() {
     setState(() {
       _mediaControlsVisible = true;
     });
     _startTimer();
   }
+
   void _showErrorAlert(String errorMessage) {
     showDialog(
       context: context,
@@ -139,8 +136,7 @@ class _MyVideoPlayerState extends State<MyVideoPlayer> {
     if (_controller.value.isPlaying) {
       _controller.pause();
     }
-    try{
-
+    try {
       FilePickerResult? result = await FilePicker.platform.pickFiles(
         type: FileType.video,
       );
@@ -164,8 +160,7 @@ class _MyVideoPlayerState extends State<MyVideoPlayer> {
             });
           });
       }
-
-    }catch(e){
+    } catch (e) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _showErrorAlert(e.toString());
       });
@@ -208,29 +203,39 @@ class _MyVideoPlayerState extends State<MyVideoPlayer> {
     });
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBodyBehindAppBar: true,
       appBar: _mediaControlsVisible
-          ? AppBar(
-        backgroundColor: Color.fromRGBO(0, 0, 0, 25),
-        title: Text(
-          appBarText,
-        style: const TextStyle(
-          color: Colors.white70
-        ),
-        ),
-      )
+          ? PreferredSize(
+              preferredSize: Size.fromHeight(80),
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Container(
+                  child: Padding(
+                    padding: EdgeInsets.all(30.2),
+                    child: Text(
+                      appBarText,
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      color: Colors.black87),
+                  // color: const Color.fromRGBO(0, 0, 0, 20),
+                ),
+              ))
           : null,
       body: GestureDetector(
         onTap: () {
-
           setState(() {
-            if(_mediaControlsVisible){
-              SystemChrome.setEnabledSystemUIMode(SystemUiMode.leanBack );
-            }else{
-              SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual , overlays: SystemUiOverlay.values);
+            if (_mediaControlsVisible) {
+              SystemChrome.setEnabledSystemUIMode(SystemUiMode.leanBack);
+            } else {
+              SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
+                  overlays: SystemUiOverlay.values);
             }
             _userInteracted = true;
             _toggleMediaControlsVisibility();
@@ -241,6 +246,9 @@ class _MyVideoPlayerState extends State<MyVideoPlayer> {
         },
         child: Stack(
           children: [
+            Container(
+              color: Colors.black,
+            ),
             Positioned.fill(
               child: FutureBuilder(
                 future: _initializeVideoPlayerFuture,
@@ -249,7 +257,6 @@ class _MyVideoPlayerState extends State<MyVideoPlayer> {
                     return FittedBox(
                       fit: _isWideScreen ? BoxFit.cover : BoxFit.contain,
                       child: SizedBox(
-
                         width: _controller.value.size.width,
                         height: _controller.value.size.height,
                         child: VideoPlayer(_controller),
@@ -278,15 +285,16 @@ class _MyVideoPlayerState extends State<MyVideoPlayer> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Container(
-                          padding: EdgeInsets.all(8.0), //
+                          padding: const EdgeInsets.all(8.0), //
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Flexible(
                                 flex: 3,
                                 child: Text(
-                                  "${formatDuration(Duration(seconds: _currentSliderValue.toInt()))}",
-                                  style: TextStyle(color: Colors.white),
+                                  formatDuration(Duration(
+                                      seconds: _currentSliderValue.toInt())),
+                                  style: const TextStyle(color: Colors.white),
                                 ),
                               ),
                               Flexible(
@@ -294,7 +302,8 @@ class _MyVideoPlayerState extends State<MyVideoPlayer> {
                                 child: Slider(
                                   value: _currentSliderValue,
                                   min: 0.0,
-                                  max: _controller.value.duration.inSeconds.toDouble(),
+                                  max: _controller.value.duration.inSeconds
+                                      .toDouble(),
                                   onChanged: (double value) {
                                     setState(() {
                                       _seekToSeconds(value);
@@ -305,21 +314,22 @@ class _MyVideoPlayerState extends State<MyVideoPlayer> {
                               Flexible(
                                 flex: 3,
                                 child: Text(
-                                  "${formatDuration(_controller.value.duration)}",
-                                  style: TextStyle(color: Colors.white),
+                                  formatDuration(Duration(
+                                      seconds:
+                                          _controller.value.duration.inSeconds -
+                                              _currentSliderValue.toInt())),
+                                  style: const TextStyle(color: Colors.white),
                                 ),
                               ),
                             ],
                           ),
                         ),
-
-
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             IconButton(
                               color: Colors.white,
-                              icon: Icon(Icons.fast_rewind),
+                              icon: const Icon(Icons.fast_rewind),
                               onPressed: () {
                                 _seekToSeconds(_currentSliderValue - 10.0);
                               },
@@ -343,28 +353,30 @@ class _MyVideoPlayerState extends State<MyVideoPlayer> {
                             ),
                             IconButton(
                               color: Colors.white,
-                              icon: Icon(Icons.fast_forward),
+                              icon: const Icon(Icons.fast_forward),
                               onPressed: () {
                                 _seekToSeconds(_currentSliderValue + 10.0);
                               },
                             ),
                             IconButton(
                               color: Colors.white,
-                              icon: Icon(Icons.folder),
+                              icon: const Icon(Icons.folder),
                               onPressed: () {
                                 _pickVideo();
                               },
                             ),
                             IconButton(
                               color: Colors.white,
-                              icon: Icon(Icons.edit),
+                              icon: const Icon(Icons.edit),
                               onPressed: () {
                                 if (_controller.value.isPlaying) {
                                   _controller.pause();
                                 }
                                 Navigator.pushReplacement(
                                   context,
-                                  MaterialPageRoute(builder: (context) => TrimmerView(File(filePath))),
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          TrimmerView(File(filePath))),
                                 );
                               },
                             ),
@@ -376,11 +388,12 @@ class _MyVideoPlayerState extends State<MyVideoPlayer> {
                                   _isWideScreen = !_isWideScreen;
                                 });
                               },
-                            ),IconButton(
+                            ),
+                            IconButton(
                               color: Colors.white,
                               icon: Icon(Icons.speed),
                               onPressed: () {
-                                  _showSpeedPopupMenu(context);
+                                _showSpeedPopupMenu(context);
                               },
                             ),
                           ],

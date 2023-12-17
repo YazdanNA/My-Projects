@@ -1,6 +1,8 @@
 import 'dart:io';
 
+import 'package:external_path/external_path.dart';
 import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:video_player_trimmer/video_player_page.dart';
 import 'package:video_trimmer/video_trimmer.dart';
 
@@ -38,12 +40,27 @@ class _TrimmerViewState extends State<TrimmerView> {
         setState(() {
           _progressVisibility = false;
         });
-        if (outputPath != null) {
-          Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => MyVideoPlayer(file: File(outputPath))));
+        // if (outputPath != null) {
+        //   Navigator.push(
+        //       context,
+        //       MaterialPageRoute(
+        //           builder: (context) => MyVideoPlayer(file: File(outputPath))));
+        // }
+
+        var status = await Permission.videos.status;
+        if(status.isGranted){
+          var path = await ExternalPath.getExternalStorageDirectories();
+          File file = File(outputPath!);
+          var read = await file.readAsBytes();
+          var newFile = await File("$path/newVideoFile.mp4").create(recursive: true );
+          await newFile.writeAsBytes(read);
+        }else{
+          _showErrorAlert(status.isGranted.toString());
         }
+
+
+
+
       },
     );
   }

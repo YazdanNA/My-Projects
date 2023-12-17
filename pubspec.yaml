@@ -39,6 +39,8 @@ dependencies:
   video_player: ^2.8.1
   file_picker: ^6.1.1
   intl: ^0.18.1
+  external_path: ^1.0.3
+  permission_handler: ^11.1.0
 
 dev_dependencies:
   flutter_test:
