@@ -40,7 +40,6 @@ class _TrimmerViewState extends State<TrimmerView> {
           _progressVisibility = false;
         });
 
-
         String? name = await _getNameOfVideo();
         if (name != "") {
           var path = await ExternalPath.getExternalStoragePublicDirectory(
@@ -49,11 +48,21 @@ class _TrimmerViewState extends State<TrimmerView> {
           if (await File("$path/$name.mp4").exists()) {
             _showErrorAlert("این فایل وجود دارد", "خطا", "error");
           } else {
+
             File file = File(outputPath!);
-            var read = await file.readAsBytes();
+            var read =  file.openRead();
+
             var newFile =
                 await File("$path/$name.mp4").create(recursive: false);
-            await newFile.writeAsBytes(read);
+            showProgress(true);
+              var sink = newFile.openWrite();
+            await for (List<int> readAsStream in read) {
+              sink.add(readAsStream);
+            }
+
+              await sink.close();
+
+            showProgress(false);
 
             _showErrorAlert(
                 "${newFile.path}\nبا موفقیت ذخیره شد", "اطلاعیه", "save",
@@ -64,6 +73,31 @@ class _TrimmerViewState extends State<TrimmerView> {
         }
       },
     );
+  }
+
+  void showProgress(bool show ){
+
+    if(show){
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return const AlertDialog(
+            backgroundColor: Colors.black87,
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text('در حال بارگذاری...' , style: TextStyle(color: Colors.white),),
+                CircularProgressIndicator(),
+              ],
+            ),
+          );
+        },
+        barrierDismissible: false,
+      );
+    }else{
+      Navigator.pop(context);
+    }
+
   }
 
   void _loadVideo() {
@@ -117,14 +151,14 @@ class _TrimmerViewState extends State<TrimmerView> {
               contentPadding:
                   const EdgeInsets.symmetric(vertical: 16.0, horizontal: 24.0),
               actions: [
-                Expanded(
-                    child: TextButton(
+                // Expanded(
+                TextButton(
                   onPressed: () {
                     Navigator.pop(context,_nameController.text);
                   },
                   child:
                       const Text('باشه', style: TextStyle(color: Colors.white)),
-                )),
+                ),
               ],
             ));
       },
