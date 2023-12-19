@@ -41,6 +41,9 @@ dependencies:
   intl: ^0.18.1
   external_path: ^1.0.3
   permission_handler: ^11.1.0
+  path_provider: ^2.1.1
+  flutter_launcher_icons: ^0.13.1
+  marquee: ^2.2.3
 
 dev_dependencies:
   flutter_test:

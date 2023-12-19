@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:video_player/video_player.dart';
 import 'package:file_picker/file_picker.dart';
 import 'dart:io';
@@ -10,13 +11,11 @@ class MyVideoPlayer extends StatefulWidget {
   const MyVideoPlayer({required this.file, super.key});
 
   @override
-  _MyVideoPlayerState createState() => _MyVideoPlayerState(file);
+  State<MyVideoPlayer> createState() => _MyVideoPlayerState();
 }
 
 class _MyVideoPlayerState extends State<MyVideoPlayer> {
-  _MyVideoPlayerState(File file) {
-    filePath = file.path;
-  }
+
   String filePath = "";
   late VideoPlayerController _controller;
   late Future<void> _initializeVideoPlayerFuture;
@@ -30,16 +29,19 @@ class _MyVideoPlayerState extends State<MyVideoPlayer> {
   @override
   void initState() {
     super.initState();
-    _controller = VideoPlayerController.file(File(filePath));
+    _controller = VideoPlayerController.file(widget.file);
     _initializeVideoPlayerFuture = _controller.initialize();
     _controller.addListener(() {
       setState(() {
         _currentSliderValue = _controller.value.position.inSeconds.toDouble();
+        appBarText = widget.file.path;
       });
       if (_controller.value.isPlaying) {
         _startTimer();
       }
-    });
+
+    })
+    ;
   }
 
   @override
@@ -60,24 +62,25 @@ class _MyVideoPlayerState extends State<MyVideoPlayer> {
 
   void _showSpeedPopupMenu(BuildContext context) async {
     double? selectedSpeed = await showMenu<double>(
+      color: Colors.black87,
       context: context,
       position: const RelativeRect.fromLTRB(0, 0, 0, 0),
       items: [
         const PopupMenuItem<double>(
           value: 0.5,
-          child: Text('0.5X'),
+          child: Text('0.5X',style: TextStyle(color: Colors.white),),
         ),
         const PopupMenuItem<double>(
           value: 1.0,
-          child: Text('1X'),
+          child: Text('1X', style: TextStyle(color: Colors.white),),
         ),
         const PopupMenuItem<double>(
           value: 1.5,
-          child: Text('1.5X'),
+          child: Text('1.5X', style: TextStyle(color: Colors.white),),
         ),
         const PopupMenuItem<double>(
           value: 2.0,
-          child: Text('2X'),
+          child: Text('2X', style: TextStyle(color: Colors.white),),
         ),
       ],
       elevation: 8.0,
@@ -117,14 +120,14 @@ class _MyVideoPlayerState extends State<MyVideoPlayer> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text('خطا'),
+          title: const Text('خطا'),
           content: Text(errorMessage),
           actions: [
             TextButton(
               onPressed: () {
                 Navigator.pop(context);
               },
-              child: Text('باشه'),
+              child: const Text('باشه'),
             ),
           ],
         );
@@ -136,59 +139,63 @@ class _MyVideoPlayerState extends State<MyVideoPlayer> {
     if (_controller.value.isPlaying) {
       _controller.pause();
     }
-    try {
-      FilePickerResult? result = await FilePicker.platform.pickFiles(
-        type: FileType.video,
-      );
+    var status = await Permission.videos.status;
+    if (status.isGranted) {
+      try {
+        FilePickerResult? result = await FilePicker.platform.pickFiles(
+          type: FileType.video,
+          onFileLoading: (p0) {
+            if(p0==FilePickerStatus.done){
+              Navigator.pop(context);
+            }else{
+            showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return const AlertDialog(
+                  backgroundColor: Colors.black87,
+                  content: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text('در حال بارگذاری...' , style: TextStyle(color: Colors.white),),
+                      CircularProgressIndicator(),
+                    ],
+                  ),
+                );
+              },
+              barrierDismissible: false,
+            );}
+          },
+        );
 
-      if (result != null && result.files.isNotEmpty) {
-        filePath = result.files.single.path!;
-        if (_controller.value.isPlaying) {
-          _controller.pause();
+
+        if (result != null && result.files.isNotEmpty) {
+          filePath = result.files.single.path!;
+          if (_controller.value.isPlaying) {
+            _controller.pause();
+          }
+          await _controller.dispose();
+          _controller = VideoPlayerController.file(File(filePath))
+            ..addListener(() {
+              setState(() {
+                _currentSliderValue =
+                    _controller.value.position.inSeconds.toDouble();
+              });
+            })
+            ..initialize().then((_) {
+              setState(() {
+                appBarText = result.files.single.name;
+              });
+            });
         }
-        await _controller.dispose();
-        _controller = VideoPlayerController.file(File(filePath))
-          ..addListener(() {
-            setState(() {
-              _currentSliderValue =
-                  _controller.value.position.inSeconds.toDouble();
-            });
-          })
-          ..initialize().then((_) {
-            setState(() {
-              appBarText = result.files.single.name;
-            });
-          });
-      }
-    } catch (e) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _showErrorAlert(e.toString());
-      });
-    }
-
-    FilePickerResult? result = await FilePicker.platform.pickFiles(
-      type: FileType.video,
-    );
-
-    if (result != null && result.files.isNotEmpty) {
-      filePath = result.files.single.path!;
-      if (_controller.value.isPlaying) {
-        _controller.pause();
-      }
-      await _controller.dispose();
-      _controller = VideoPlayerController.file(File(filePath))
-        ..addListener(() {
-          setState(() {
-            _currentSliderValue =
-                _controller.value.position.inSeconds.toDouble();
-          });
-        })
-        ..initialize().then((_) {
-          setState(() {
-            appBarText = result.files.single.name;
-          });
+      } catch (e) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _showErrorAlert(e.toString());
         });
+      }
+    } else {
+      await Permission.videos.request();
     }
+
   }
 
   void _seekToSeconds(double seconds) {
@@ -206,24 +213,24 @@ class _MyVideoPlayerState extends State<MyVideoPlayer> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       extendBodyBehindAppBar: true,
       appBar: _mediaControlsVisible
           ? PreferredSize(
-              preferredSize: Size.fromHeight(80),
+              preferredSize: const Size.fromHeight(80),
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Container(
-                  child: Padding(
-                    padding: EdgeInsets.all(30.2),
-                    child: Text(
-                      appBarText,
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  ),
-
                   decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(10),
                       color: Colors.black87),
+                  child: Padding(
+                    padding: const EdgeInsets.all(30.2),
+                    child: Text(
+                      appBarText,
+                      style: const TextStyle(color: Colors.white),
+                    ),
+                  ),
                   // color: const Color.fromRGBO(0, 0, 0, 20),
                 ),
               ))
@@ -272,7 +279,7 @@ class _MyVideoPlayerState extends State<MyVideoPlayer> {
             ),
             AnimatedOpacity(
               opacity: _mediaControlsVisible ? 1.0 : 0.0,
-              duration: Duration(milliseconds: 300),
+              duration: const Duration(milliseconds: 300),
               child: Align(
                 alignment: Alignment.bottomCenter,
                 child: Padding(
@@ -382,7 +389,7 @@ class _MyVideoPlayerState extends State<MyVideoPlayer> {
                             ),
                             IconButton(
                               color: Colors.white,
-                              icon: Icon(Icons.aspect_ratio),
+                              icon: const Icon(Icons.aspect_ratio),
                               onPressed: () {
                                 setState(() {
                                   _isWideScreen = !_isWideScreen;
@@ -391,7 +398,7 @@ class _MyVideoPlayerState extends State<MyVideoPlayer> {
                             ),
                             IconButton(
                               color: Colors.white,
-                              icon: Icon(Icons.speed),
+                              icon: const Icon(Icons.speed),
                               onPressed: () {
                                 _showSpeedPopupMenu(context);
                               },
