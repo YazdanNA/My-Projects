@@ -48,25 +48,32 @@ class _TrimmerViewState extends State<TrimmerView> {
           if (await File("$path/$name.mp4").exists()) {
             _showErrorAlert("این فایل وجود دارد", "خطا", "error");
           } else {
-
-            File file = File(outputPath!);
-            var read =  file.openRead();
-
-            var newFile =
-                await File("$path/$name.mp4").create(recursive: false);
-            showProgress(true);
-              var sink = newFile.openWrite();
-            await for (List<int> readAsStream in read) {
-              sink.add(readAsStream);
+            if (outputPath == null || outputPath == "") {
+              return _showErrorAlert(
+                  "خطایی رخ داده لطفا دوباره تلاش کنید", "خطا", "error");
             }
+            try {
+              File file = File(outputPath);
+              var read = file.openRead();
+
+              var newFile =
+                  await File("$path/$name.mp4").create(recursive: false);
+              showProgress(true);
+              var sink = newFile.openWrite();
+              await for (List<int> readAsStream in read) {
+                sink.add(readAsStream);
+              }
 
               await sink.close();
 
-            showProgress(false);
+              showProgress(false);
 
-            _showErrorAlert(
-                "${newFile.path}\nبا موفقیت ذخیره شد", "اطلاعیه", "save",
-                trimmed: outputPath, main: widget.file.path);
+              _showErrorAlert(
+                  "${newFile.path}\nبا موفقیت ذخیره شد", "اطلاعیه", "save",
+                  trimmed: outputPath, main: widget.file.path);
+            } catch (e) {
+              _showErrorAlert(e.toString(), "حطا", "error");
+            }
           }
         } else {
           _showErrorAlert("نام فایل نمی تواند خالی باشد", "خطا", "error");
@@ -74,10 +81,46 @@ class _TrimmerViewState extends State<TrimmerView> {
       },
     );
   }
+  void canPop() {
+    showDialog<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Colors.black87,
+          title: const Text('آیا مطمئن هستید؟' ,style: TextStyle(color: Colors.white),textAlign: TextAlign.end),
+          content: const Text(
+              'تغییرات ذخیره نخواهد شد؟',
+              style: TextStyle(color: Colors.white),textAlign: TextAlign.end
+          ),
+          actions: <Widget>[
+            TextButton(
+              style: TextButton.styleFrom(
+                textStyle: Theme.of(context).textTheme.labelLarge,
+              ),
+              child: const Text('نه'),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
+            TextButton(
+              style: TextButton.styleFrom(
+                textStyle: Theme.of(context).textTheme.labelLarge,
+              ),
+              child: const Text('بله'),
+              onPressed: () {
+                Navigator.pop(context);
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
 
-  void showProgress(bool show ){
 
-    if(show){
+  void showProgress(bool show) {
+    if (show) {
       showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -86,7 +129,10 @@ class _TrimmerViewState extends State<TrimmerView> {
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text('در حال بارگذاری...' , style: TextStyle(color: Colors.white),),
+                Text(
+                  '...در حال ذخیره سازی',
+                  style: TextStyle(color: Colors.white),
+                ),
                 CircularProgressIndicator(),
               ],
             ),
@@ -94,10 +140,9 @@ class _TrimmerViewState extends State<TrimmerView> {
         },
         barrierDismissible: false,
       );
-    }else{
+    } else {
       Navigator.pop(context);
     }
-
   }
 
   void _loadVideo() {
@@ -154,7 +199,7 @@ class _TrimmerViewState extends State<TrimmerView> {
                 // Expanded(
                 TextButton(
                   onPressed: () {
-                    Navigator.pop(context,_nameController.text);
+                    Navigator.pop(context, _nameController.text);
                   },
                   child:
                       const Text('باشه', style: TextStyle(color: Colors.white)),
@@ -191,7 +236,6 @@ class _TrimmerViewState extends State<TrimmerView> {
                   child: const Text('باشه'),
                 ),
               ],
-
             );
           },
           barrierDismissible: false,
@@ -215,21 +259,21 @@ class _TrimmerViewState extends State<TrimmerView> {
               actions: [
                 TextButton(
                   onPressed: () {
-                    Navigator.pushReplacement(
+                    Navigator.pushAndRemoveUntil(
                         context,
                         MaterialPageRoute(
                             builder: (context) =>
-                                MyVideoPlayer(file: File(trimmed))));
+                                MyVideoPlayer(file: File(trimmed))),(route) => false,);
                   },
                   child: const Text('پخش فایل تریم شده'),
                 ),
                 TextButton(
                   onPressed: () {
-                    Navigator.pushReplacement(
+                    Navigator.pushAndRemoveUntil(
                         context,
                         MaterialPageRoute(
                             builder: (context) =>
-                                MyVideoPlayer(file: File(main))));
+                                MyVideoPlayer(file: File(main))),(route) => false);
                   },
                   child: const Text('پخش فایل اصلی'),
                 ),
@@ -250,7 +294,16 @@ class _TrimmerViewState extends State<TrimmerView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return PopScope(
+
+        canPop: false,
+        onPopInvoked: (bool didPop) {
+      if (didPop) {
+        return;
+      }
+      canPop();
+    },
+    child:Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
         backgroundColor: const Color.fromRGBO(0, 0, 0, 20),
@@ -321,6 +374,6 @@ class _TrimmerViewState extends State<TrimmerView> {
           ),
         )),
       ),
-    );
+    ));
   }
 }

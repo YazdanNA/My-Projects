@@ -210,9 +210,54 @@ class _MyVideoPlayerState extends State<MyVideoPlayer> {
     });
   }
 
+  void canPop() {
+    showDialog<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Colors.black87,
+          title: const Text('آیا مطمئن هستید؟' ,style: TextStyle(color: Colors.white),textAlign: TextAlign.end),
+          content: const Text(
+            'آیا مطمئن هستی که میخوای برنامه رو ترک کنی؟',
+              style: TextStyle(color: Colors.white),textAlign: TextAlign.end
+          ),
+          actions: <Widget>[
+            TextButton(
+              style: TextButton.styleFrom(
+                textStyle: Theme.of(context).textTheme.labelLarge,
+              ),
+              child: const Text('نه'),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
+            TextButton(
+              style: TextButton.styleFrom(
+                textStyle: Theme.of(context).textTheme.labelLarge,
+              ),
+              child: const Text('بله'),
+              onPressed: () {
+                Navigator.pop(context);
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return PopScope(
+
+            canPop: false,
+            onPopInvoked: (bool didPop) {
+              if (didPop) {
+                return;
+              }
+              canPop();
+            },
+        child:Scaffold(
       resizeToAvoidBottomInset: false,
       extendBodyBehindAppBar: true,
       appBar: _mediaControlsVisible
@@ -291,6 +336,7 @@ class _MyVideoPlayerState extends State<MyVideoPlayer> {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
+
                         Container(
                           padding: const EdgeInsets.all(8.0), //
                           child: Row(
@@ -379,7 +425,7 @@ class _MyVideoPlayerState extends State<MyVideoPlayer> {
                                 if (_controller.value.isPlaying) {
                                   _controller.pause();
                                 }
-                                Navigator.pushReplacement(
+                                Navigator.push(
                                   context,
                                   MaterialPageRoute(
                                       builder: (context) =>
@@ -414,6 +460,7 @@ class _MyVideoPlayerState extends State<MyVideoPlayer> {
           ],
         ),
       ),
+    )
     );
   }
 }
