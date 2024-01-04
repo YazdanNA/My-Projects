@@ -70,7 +70,7 @@ class _TrimmerViewState extends State<TrimmerView> {
 
               _showErrorAlert(
                   "${newFile.path}\n Saved successfully", "Info", "save",
-                  trimmed: outputPath, main: widget.file.path);
+                  trimmed: "$path/$name.mp4", main: widget.file.path);
             } catch (e) {
               _showErrorAlert(e.toString(), "Error", "error");
             }

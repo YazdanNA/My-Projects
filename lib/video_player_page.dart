@@ -199,6 +199,7 @@ class _MyVideoPlayerState extends State<MyVideoPlayer> {
                 appBarText = result.files.single.name;
               });
             });
+          _controller.play();
         }
       } catch (e) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -248,8 +249,8 @@ class _MyVideoPlayerState extends State<MyVideoPlayer> {
               ),
               child: const Text('Yes'),
               onPressed: () {
-                Navigator.pop(context);
-                Navigator.pop(context);
+                SystemNavigator.pop();
+                SystemNavigator.pop();
               },
             ),
           ],
