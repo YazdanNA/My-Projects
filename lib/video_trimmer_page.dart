@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:external_path/external_path.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:video_player_trimmer/video_player_page.dart';
 import 'package:video_trimmer/video_trimmer.dart';
 
@@ -46,11 +45,12 @@ class _TrimmerViewState extends State<TrimmerView> {
               ExternalPath.DIRECTORY_DOWNLOADS);
 
           if (await File("$path/$name.mp4").exists()) {
-            _showErrorAlert("این فایل وجود دارد", "خطا", "error");
+            _showErrorAlert(
+                "A file with this name already exists", "Error", "error");
           } else {
             if (outputPath == null || outputPath == "") {
               return _showErrorAlert(
-                  "خطایی رخ داده لطفا دوباره تلاش کنید", "خطا", "error");
+                  "An error occurred, please try later", "Error", "error");
             }
             try {
               File file = File(outputPath);
@@ -69,35 +69,35 @@ class _TrimmerViewState extends State<TrimmerView> {
               showProgress(false);
 
               _showErrorAlert(
-                  "${newFile.path}\nبا موفقیت ذخیره شد", "اطلاعیه", "save",
+                  "${newFile.path}\n Saved successfully", "Info", "save",
                   trimmed: outputPath, main: widget.file.path);
             } catch (e) {
-              _showErrorAlert(e.toString(), "حطا", "error");
+              _showErrorAlert(e.toString(), "Error", "error");
             }
           }
         } else {
-          _showErrorAlert("نام فایل نمی تواند خالی باشد", "خطا", "error");
+          _showErrorAlert("The file name cannot be empty", "Error", "error");
         }
       },
     );
   }
+
   void canPop() {
     showDialog<void>(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           backgroundColor: Colors.black87,
-          title: const Text('آیا مطمئن هستید؟' ,style: TextStyle(color: Colors.white),textAlign: TextAlign.end),
-          content: const Text(
-              'تغییرات ذخیره نخواهد شد؟',
-              style: TextStyle(color: Colors.white),textAlign: TextAlign.end
-          ),
+          title: const Text('Are you sure?',
+              style: TextStyle(color: Colors.white), textAlign: TextAlign.end),
+          content: const Text('The changes will be lost',
+              style: TextStyle(color: Colors.white), textAlign: TextAlign.end),
           actions: <Widget>[
             TextButton(
               style: TextButton.styleFrom(
                 textStyle: Theme.of(context).textTheme.labelLarge,
               ),
-              child: const Text('نه'),
+              child: const Text('No'),
               onPressed: () {
                 Navigator.pop(context);
               },
@@ -106,7 +106,7 @@ class _TrimmerViewState extends State<TrimmerView> {
               style: TextButton.styleFrom(
                 textStyle: Theme.of(context).textTheme.labelLarge,
               ),
-              child: const Text('بله'),
+              child: const Text('Yes'),
               onPressed: () {
                 Navigator.pop(context);
                 Navigator.pop(context);
@@ -117,7 +117,6 @@ class _TrimmerViewState extends State<TrimmerView> {
       },
     );
   }
-
 
   void showProgress(bool show) {
     if (show) {
@@ -130,7 +129,7 @@ class _TrimmerViewState extends State<TrimmerView> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  '...در حال ذخیره سازی',
+                  'Saving...',
                   style: TextStyle(color: Colors.white),
                 ),
                 CircularProgressIndicator(),
@@ -150,7 +149,7 @@ class _TrimmerViewState extends State<TrimmerView> {
       _trimmer.loadVideo(videoFile: widget.file);
     } catch (e) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        _showErrorAlert(e.toString(), "خطا", "error");
+        _showErrorAlert(e.toString(), "Error", "error");
       });
     }
   }
@@ -165,14 +164,14 @@ class _TrimmerViewState extends State<TrimmerView> {
             child: AlertDialog(
               backgroundColor: Colors.black87,
               title: const Text(
-                "ذخیره فایل",
+                "Save file",
                 textAlign: TextAlign.end,
                 style: TextStyle(color: Colors.white),
               ),
               content: Column(
                 children: [
                   const Text(
-                    'لطفاً یک نام معتبر وارد کنید',
+                    'Please enter the name of file',
                     textAlign: TextAlign.end,
                     style: TextStyle(color: Colors.white),
                   ),
@@ -180,14 +179,14 @@ class _TrimmerViewState extends State<TrimmerView> {
                     style: const TextStyle(color: Colors.white),
                     cursorColor: Colors.white,
                     controller: _nameController,
-                    inputFormatters: [
-                      FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9]')),
-                    ],
+                    // inputFormatters: [
+                    //   FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9]')),
+                    // ],
                     decoration: const InputDecoration(
                         fillColor: Colors.white,
                         filled: false,
                         focusColor: Colors.white,
-                        labelText: 'نام',
+                        labelText: 'Name',
                         labelStyle: TextStyle(color: Colors.white),
                         counterStyle: TextStyle(color: Colors.white)),
                   ),
@@ -202,7 +201,7 @@ class _TrimmerViewState extends State<TrimmerView> {
                     Navigator.pop(context, _nameController.text);
                   },
                   child:
-                      const Text('باشه', style: TextStyle(color: Colors.white)),
+                      const Text('Ok', style: TextStyle(color: Colors.white)),
                 ),
               ],
             ));
@@ -233,7 +232,7 @@ class _TrimmerViewState extends State<TrimmerView> {
                   onPressed: () {
                     Navigator.pop(context);
                   },
-                  child: const Text('باشه'),
+                  child: const Text('Ok'),
                 ),
               ],
             );
@@ -260,12 +259,14 @@ class _TrimmerViewState extends State<TrimmerView> {
                 TextButton(
                   onPressed: () {
                     Navigator.pushAndRemoveUntil(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) =>
-                                MyVideoPlayer(file: File(trimmed))),(route) => false,);
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) =>
+                              MyVideoPlayer(file: File(trimmed))),
+                      (route) => false,
+                    );
                   },
-                  child: const Text('پخش فایل تریم شده'),
+                  child: const Text('Play trimmed video'),
                 ),
                 TextButton(
                   onPressed: () {
@@ -273,9 +274,10 @@ class _TrimmerViewState extends State<TrimmerView> {
                         context,
                         MaterialPageRoute(
                             builder: (context) =>
-                                MyVideoPlayer(file: File(main))),(route) => false);
+                                MyVideoPlayer(file: File(main))),
+                        (route) => false);
                   },
-                  child: const Text('پخش فایل اصلی'),
+                  child: const Text('Play original video'),
                 ),
               ],
             );
@@ -295,85 +297,84 @@ class _TrimmerViewState extends State<TrimmerView> {
   @override
   Widget build(BuildContext context) {
     return PopScope(
-
         canPop: false,
         onPopInvoked: (bool didPop) {
-      if (didPop) {
-        return;
-      }
-      canPop();
-    },
-    child:Scaffold(
-      resizeToAvoidBottomInset: false,
-      appBar: AppBar(
-        backgroundColor: const Color.fromRGBO(0, 0, 0, 20),
-        actions: [
-          IconButton(
-              color: Colors.white,
-              onPressed: _progressVisibility
-                  ? null
-                  : () async {
-                      await _saveVideo(context);
-                    },
-              icon: const Icon(Icons.save_alt))
-        ],
-      ),
-      body: Builder(
-        builder: (context) => Center(
-            child: Container(
-          padding: const EdgeInsets.only(bottom: 30.0),
-          color: Colors.black,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            mainAxisSize: MainAxisSize.max,
-            children: <Widget>[
-              Visibility(
-                visible: _progressVisibility,
-                child: const LinearProgressIndicator(
-                  backgroundColor: Colors.red,
-                ),
-              ),
-              Expanded(
-                child: VideoViewer(trimmer: _trimmer),
-              ),
-              Center(
-                child: TrimViewer(
-                  trimmer: _trimmer,
-                  viewerHeight: 50.0,
-                  viewerWidth: MediaQuery.of(context).size.width,
-                  maxVideoLength: const Duration(minutes: 200),
-                  onChangeStart: (value) => _startValue = value,
-                  onChangeEnd: (value) => _endValue = value,
-                  onChangePlaybackState: (value) =>
-                      setState(() => _isPlaying = value),
-                ),
-              ),
-              TextButton(
-                child: _isPlaying
-                    ? const Icon(
-                        Icons.pause,
-                        size: 50.0,
-                        color: Colors.white,
-                      )
-                    : const Icon(
-                        Icons.play_arrow,
-                        size: 50.0,
-                        color: Colors.white,
-                      ),
-                onPressed: () async {
-                  bool playbackState = await _trimmer.videoPlaybackControl(
-                    startValue: _startValue,
-                    endValue: _endValue,
-                  );
-                  setState(() {
-                    _isPlaying = playbackState;
-                  });
-                },
-              )
+          if (didPop) {
+            return;
+          }
+          canPop();
+        },
+        child: Scaffold(
+          resizeToAvoidBottomInset: false,
+          appBar: AppBar(
+            backgroundColor: const Color.fromRGBO(0, 0, 0, 20),
+            actions: [
+              IconButton(
+                  color: Colors.white,
+                  onPressed: _progressVisibility
+                      ? null
+                      : () async {
+                          await _saveVideo(context);
+                        },
+                  icon: const Icon(Icons.save_alt))
             ],
           ),
-        )),
-      ),
-    ));
+          body: Builder(
+            builder: (context) => Center(
+                child: Container(
+              padding: const EdgeInsets.only(bottom: 30.0),
+              color: Colors.black,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.max,
+                children: <Widget>[
+                  Visibility(
+                    visible: _progressVisibility,
+                    child: const LinearProgressIndicator(
+                      backgroundColor: Colors.red,
+                    ),
+                  ),
+                  Expanded(
+                    child: VideoViewer(trimmer: _trimmer),
+                  ),
+                  Center(
+                    child: TrimViewer(
+                      trimmer: _trimmer,
+                      viewerHeight: 50.0,
+                      viewerWidth: MediaQuery.of(context).size.width,
+                      maxVideoLength: const Duration(minutes: 200),
+                      onChangeStart: (value) => _startValue = value,
+                      onChangeEnd: (value) => _endValue = value,
+                      onChangePlaybackState: (value) =>
+                          setState(() => _isPlaying = value),
+                    ),
+                  ),
+                  TextButton(
+                    child: _isPlaying
+                        ? const Icon(
+                            Icons.pause,
+                            size: 50.0,
+                            color: Colors.white,
+                          )
+                        : const Icon(
+                            Icons.play_arrow,
+                            size: 50.0,
+                            color: Colors.white,
+                          ),
+                    onPressed: () async {
+                      bool playbackState = await _trimmer.videoPlaybackControl(
+                        startValue: _startValue,
+                        endValue: _endValue,
+                      );
+                      setState(() {
+                        _isPlaying = playbackState;
+                      });
+                    },
+                  )
+                ],
+              ),
+            )),
+          ),
+        ));
   }
 }

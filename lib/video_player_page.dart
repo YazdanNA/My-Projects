@@ -8,6 +8,7 @@ import 'package:video_player_trimmer/video_trimmer_page.dart';
 
 class MyVideoPlayer extends StatefulWidget {
   final File file;
+
   const MyVideoPlayer({required this.file, super.key});
 
   @override
@@ -15,7 +16,6 @@ class MyVideoPlayer extends StatefulWidget {
 }
 
 class _MyVideoPlayerState extends State<MyVideoPlayer> {
-
   String filePath = "";
   late VideoPlayerController _controller;
   late Future<void> _initializeVideoPlayerFuture;
@@ -39,9 +39,7 @@ class _MyVideoPlayerState extends State<MyVideoPlayer> {
       if (_controller.value.isPlaying) {
         _startTimer();
       }
-
-    })
-    ;
+    });
   }
 
   @override
@@ -68,19 +66,31 @@ class _MyVideoPlayerState extends State<MyVideoPlayer> {
       items: [
         const PopupMenuItem<double>(
           value: 0.5,
-          child: Text('0.5X',style: TextStyle(color: Colors.white),),
+          child: Text(
+            '0.5X',
+            style: TextStyle(color: Colors.white),
+          ),
         ),
         const PopupMenuItem<double>(
           value: 1.0,
-          child: Text('1X', style: TextStyle(color: Colors.white),),
+          child: Text(
+            '1X',
+            style: TextStyle(color: Colors.white),
+          ),
         ),
         const PopupMenuItem<double>(
           value: 1.5,
-          child: Text('1.5X', style: TextStyle(color: Colors.white),),
+          child: Text(
+            '1.5X',
+            style: TextStyle(color: Colors.white),
+          ),
         ),
         const PopupMenuItem<double>(
           value: 2.0,
-          child: Text('2X', style: TextStyle(color: Colors.white),),
+          child: Text(
+            '2X',
+            style: TextStyle(color: Colors.white),
+          ),
         ),
       ],
       elevation: 8.0,
@@ -120,14 +130,14 @@ class _MyVideoPlayerState extends State<MyVideoPlayer> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('خطا'),
+          title: const Text('An error occurred'),
           content: Text(errorMessage),
           actions: [
             TextButton(
               onPressed: () {
                 Navigator.pop(context);
               },
-              child: const Text('باشه'),
+              child: const Text('Ok'),
             ),
           ],
         );
@@ -145,28 +155,31 @@ class _MyVideoPlayerState extends State<MyVideoPlayer> {
         FilePickerResult? result = await FilePicker.platform.pickFiles(
           type: FileType.video,
           onFileLoading: (p0) {
-            if(p0==FilePickerStatus.done){
+            if (p0 == FilePickerStatus.done) {
               Navigator.pop(context);
-            }else{
-            showDialog(
-              context: context,
-              builder: (BuildContext context) {
-                return const AlertDialog(
-                  backgroundColor: Colors.black87,
-                  content: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text('در حال بارگذاری...' , style: TextStyle(color: Colors.white),),
-                      CircularProgressIndicator(),
-                    ],
-                  ),
-                );
-              },
-              barrierDismissible: false,
-            );}
+            } else {
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return const AlertDialog(
+                    backgroundColor: Colors.black87,
+                    content: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'Loading...',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                        CircularProgressIndicator(),
+                      ],
+                    ),
+                  );
+                },
+                barrierDismissible: false,
+              );
+            }
           },
         );
-
 
         if (result != null && result.files.isNotEmpty) {
           filePath = result.files.single.path!;
@@ -195,7 +208,6 @@ class _MyVideoPlayerState extends State<MyVideoPlayer> {
     } else {
       await Permission.videos.request();
     }
-
   }
 
   void _seekToSeconds(double seconds) {
@@ -216,17 +228,16 @@ class _MyVideoPlayerState extends State<MyVideoPlayer> {
       builder: (BuildContext context) {
         return AlertDialog(
           backgroundColor: Colors.black87,
-          title: const Text('آیا مطمئن هستید؟' ,style: TextStyle(color: Colors.white),textAlign: TextAlign.end),
-          content: const Text(
-            'آیا مطمئن هستی که میخوای برنامه رو ترک کنی؟',
-              style: TextStyle(color: Colors.white),textAlign: TextAlign.end
-          ),
+          title: const Text('Exist',
+              style: TextStyle(color: Colors.white), textAlign: TextAlign.end),
+          content: const Text('Are you sure you want to exit?',
+              style: TextStyle(color: Colors.white), textAlign: TextAlign.end),
           actions: <Widget>[
             TextButton(
               style: TextButton.styleFrom(
                 textStyle: Theme.of(context).textTheme.labelLarge,
               ),
-              child: const Text('نه'),
+              child: const Text('Cancel'),
               onPressed: () {
                 Navigator.pop(context);
               },
@@ -235,7 +246,7 @@ class _MyVideoPlayerState extends State<MyVideoPlayer> {
               style: TextButton.styleFrom(
                 textStyle: Theme.of(context).textTheme.labelLarge,
               ),
-              child: const Text('بله'),
+              child: const Text('Yes'),
               onPressed: () {
                 Navigator.pop(context);
                 Navigator.pop(context);
@@ -246,221 +257,223 @@ class _MyVideoPlayerState extends State<MyVideoPlayer> {
       },
     );
   }
+
   @override
   Widget build(BuildContext context) {
     return PopScope(
-
-            canPop: false,
-            onPopInvoked: (bool didPop) {
-              if (didPop) {
-                return;
-              }
-              canPop();
-            },
-        child:Scaffold(
-      resizeToAvoidBottomInset: false,
-      extendBodyBehindAppBar: true,
-      appBar: _mediaControlsVisible
-          ? PreferredSize(
-              preferredSize: const Size.fromHeight(80),
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Container(
-                  decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
-                      color: Colors.black87),
-                  child: Padding(
-                    padding: const EdgeInsets.all(30.2),
-                    child: Text(
-                      appBarText,
-                      style: const TextStyle(color: Colors.white),
-                    ),
-                  ),
-                  // color: const Color.fromRGBO(0, 0, 0, 20),
-                ),
-              ))
-          : null,
-      body: GestureDetector(
-        onTap: () {
-          setState(() {
-            if (_mediaControlsVisible) {
-              SystemChrome.setEnabledSystemUIMode(SystemUiMode.leanBack);
-            } else {
-              SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
-                  overlays: SystemUiOverlay.values);
-            }
-            _userInteracted = true;
-            _toggleMediaControlsVisibility();
-            if (_mediaControlsVisible) {
-              _resetTimer();
-            }
-          });
+        canPop: false,
+        onPopInvoked: (bool didPop) {
+          if (didPop) {
+            return;
+          }
+          canPop();
         },
-        child: Stack(
-          children: [
-            Container(
-              color: Colors.black,
-            ),
-            Positioned.fill(
-              child: FutureBuilder(
-                future: _initializeVideoPlayerFuture,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.done) {
-                    return FittedBox(
-                      fit: _isWideScreen ? BoxFit.cover : BoxFit.contain,
-                      child: SizedBox(
-                        width: _controller.value.size.width,
-                        height: _controller.value.size.height,
-                        child: VideoPlayer(_controller),
+        child: Scaffold(
+          resizeToAvoidBottomInset: false,
+          extendBodyBehindAppBar: true,
+          appBar: _mediaControlsVisible
+              ? PreferredSize(
+                  preferredSize: const Size.fromHeight(80),
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Container(
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          color: Colors.black87),
+                      child: Padding(
+                        padding: const EdgeInsets.all(30.2),
+                        child: Text(
+                          appBarText,
+                          style: const TextStyle(color: Colors.white),
+                        ),
                       ),
-                    );
-                  } else {
-                    return const Center(
-                      child: CircularProgressIndicator(),
-                    );
-                  }
-                },
-              ),
-            ),
-            AnimatedOpacity(
-              opacity: _mediaControlsVisible ? 1.0 : 0.0,
-              duration: const Duration(milliseconds: 300),
-              child: Align(
-                alignment: Alignment.bottomCenter,
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Container(
-                    decoration: BoxDecoration(
-                        color: Colors.black87,
-                        borderRadius: BorderRadius.circular(10)),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-
-                        Container(
-                          padding: const EdgeInsets.all(8.0), //
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Flexible(
-                                flex: 3,
-                                child: Text(
-                                  formatDuration(Duration(
-                                      seconds: _currentSliderValue.toInt())),
-                                  style: const TextStyle(color: Colors.white),
-                                ),
+                      // color: const Color.fromRGBO(0, 0, 0, 20),
+                    ),
+                  ))
+              : null,
+          body: GestureDetector(
+            onTap: () {
+              setState(() {
+                if (_mediaControlsVisible) {
+                  SystemChrome.setEnabledSystemUIMode(SystemUiMode.leanBack);
+                } else {
+                  SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
+                      overlays: SystemUiOverlay.values);
+                }
+                _userInteracted = true;
+                _toggleMediaControlsVisibility();
+                if (_mediaControlsVisible) {
+                  _resetTimer();
+                }
+              });
+            },
+            child: Stack(
+              children: [
+                Container(
+                  color: Colors.black,
+                ),
+                Positioned.fill(
+                  child: FutureBuilder(
+                    future: _initializeVideoPlayerFuture,
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.done) {
+                        return FittedBox(
+                          fit: _isWideScreen ? BoxFit.cover : BoxFit.contain,
+                          child: SizedBox(
+                            width: _controller.value.size.width,
+                            height: _controller.value.size.height,
+                            child: VideoPlayer(_controller),
+                          ),
+                        );
+                      } else {
+                        return const Center(
+                          child: CircularProgressIndicator(),
+                        );
+                      }
+                    },
+                  ),
+                ),
+                AnimatedOpacity(
+                  opacity: _mediaControlsVisible ? 1.0 : 0.0,
+                  duration: const Duration(milliseconds: 300),
+                  child: Align(
+                    alignment: Alignment.bottomCenter,
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Container(
+                        decoration: BoxDecoration(
+                            color: Colors.black87,
+                            borderRadius: BorderRadius.circular(10)),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(8.0), //
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Flexible(
+                                    flex: 3,
+                                    child: Text(
+                                      formatDuration(Duration(
+                                          seconds:
+                                              _currentSliderValue.toInt())),
+                                      style:
+                                          const TextStyle(color: Colors.white),
+                                    ),
+                                  ),
+                                  Flexible(
+                                    flex: 9,
+                                    child: Slider(
+                                      value: _currentSliderValue,
+                                      min: 0.0,
+                                      max: _controller.value.duration.inSeconds
+                                          .toDouble(),
+                                      onChanged: (double value) {
+                                        setState(() {
+                                          _seekToSeconds(value);
+                                        });
+                                      },
+                                    ),
+                                  ),
+                                  Flexible(
+                                    flex: 3,
+                                    child: Text(
+                                      formatDuration(Duration(
+                                          seconds: _controller
+                                                  .value.duration.inSeconds -
+                                              _currentSliderValue.toInt())),
+                                      style:
+                                          const TextStyle(color: Colors.white),
+                                    ),
+                                  ),
+                                ],
                               ),
-                              Flexible(
-                                flex: 9,
-                                child: Slider(
-                                  value: _currentSliderValue,
-                                  min: 0.0,
-                                  max: _controller.value.duration.inSeconds
-                                      .toDouble(),
-                                  onChanged: (double value) {
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                IconButton(
+                                  color: Colors.white,
+                                  icon: const Icon(Icons.fast_rewind),
+                                  onPressed: () {
+                                    _seekToSeconds(_currentSliderValue - 10.0);
+                                  },
+                                ),
+                                IconButton(
+                                  color: Colors.white,
+                                  icon: Icon(
+                                    _controller.value.isPlaying
+                                        ? Icons.pause
+                                        : Icons.play_arrow,
+                                  ),
+                                  onPressed: () {
                                     setState(() {
-                                      _seekToSeconds(value);
+                                      if (_controller.value.isPlaying) {
+                                        _controller.pause();
+                                      } else {
+                                        _controller.play();
+                                      }
                                     });
                                   },
                                 ),
-                              ),
-                              Flexible(
-                                flex: 3,
-                                child: Text(
-                                  formatDuration(Duration(
-                                      seconds:
-                                          _controller.value.duration.inSeconds -
-                                              _currentSliderValue.toInt())),
-                                  style: const TextStyle(color: Colors.white),
+                                IconButton(
+                                  color: Colors.white,
+                                  icon: const Icon(Icons.fast_forward),
+                                  onPressed: () {
+                                    _seekToSeconds(_currentSliderValue + 10.0);
+                                  },
                                 ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            IconButton(
-                              color: Colors.white,
-                              icon: const Icon(Icons.fast_rewind),
-                              onPressed: () {
-                                _seekToSeconds(_currentSliderValue - 10.0);
-                              },
-                            ),
-                            IconButton(
-                              color: Colors.white,
-                              icon: Icon(
-                                _controller.value.isPlaying
-                                    ? Icons.pause
-                                    : Icons.play_arrow,
-                              ),
-                              onPressed: () {
-                                setState(() {
-                                  if (_controller.value.isPlaying) {
-                                    _controller.pause();
-                                  } else {
-                                    _controller.play();
-                                  }
-                                });
-                              },
-                            ),
-                            IconButton(
-                              color: Colors.white,
-                              icon: const Icon(Icons.fast_forward),
-                              onPressed: () {
-                                _seekToSeconds(_currentSliderValue + 10.0);
-                              },
-                            ),
-                            IconButton(
-                              color: Colors.white,
-                              icon: const Icon(Icons.folder),
-                              onPressed: () {
-                                _pickVideo();
-                              },
-                            ),
-                            IconButton(
-                              color: Colors.white,
-                              icon: const Icon(Icons.edit),
-                              onPressed: () {
-                                if (_controller.value.isPlaying) {
-                                  _controller.pause();
-                                }
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) =>
-                                          TrimmerView(File(filePath))),
-                                );
-                              },
-                            ),
-                            IconButton(
-                              color: Colors.white,
-                              icon: const Icon(Icons.aspect_ratio),
-                              onPressed: () {
-                                setState(() {
-                                  _isWideScreen = !_isWideScreen;
-                                });
-                              },
-                            ),
-                            IconButton(
-                              color: Colors.white,
-                              icon: const Icon(Icons.speed),
-                              onPressed: () {
-                                _showSpeedPopupMenu(context);
-                              },
+                                IconButton(
+                                  color: Colors.white,
+                                  icon: const Icon(Icons.folder),
+                                  onPressed: () {
+                                    _pickVideo();
+                                  },
+                                ),
+                                IconButton(
+                                  color: Colors.white,
+                                  icon: const Icon(Icons.edit),
+                                  onPressed: () {
+                                    if (_controller.value.isPlaying) {
+                                      _controller.pause();
+                                    }
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) =>
+                                              TrimmerView(File(filePath))),
+                                    );
+                                  },
+                                ),
+                                IconButton(
+                                  color: Colors.white,
+                                  icon: const Icon(Icons.aspect_ratio),
+                                  onPressed: () {
+                                    setState(() {
+                                      _isWideScreen = !_isWideScreen;
+                                    });
+                                  },
+                                ),
+                                IconButton(
+                                  color: Colors.white,
+                                  icon: const Icon(Icons.speed),
+                                  onPressed: () {
+                                    _showSpeedPopupMenu(context);
+                                  },
+                                ),
+                              ],
                             ),
                           ],
                         ),
-                      ],
+                      ),
                     ),
                   ),
                 ),
-              ),
+              ],
             ),
-          ],
-        ),
-      ),
-    )
-    );
+          ),
+        ));
   }
 }

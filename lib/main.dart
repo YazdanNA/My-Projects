@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:video_player_trimmer/MyNavigator.dart';
 import 'package:video_player_trimmer/video_player_page.dart';
 
 void main() => runApp(const MyApp());
@@ -12,7 +11,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      navigatorObservers: [MyNavigatorObserver()],
+      navigatorObservers: [NavigatorObserver()],
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.blue,
@@ -27,6 +26,9 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(body: MyVideoPlayer(file: File(""),));
+    return Scaffold(
+        body: MyVideoPlayer(
+      file: File(""),
+    ));
   }
 }
